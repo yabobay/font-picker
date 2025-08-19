@@ -27,17 +27,17 @@
   "Interactively choose a font for the current session."
   (interactive)
   (if (zerop (length font-picker-font-rotation))
-     (message "You don't have any fonts selected in `font-picker-font-rotation'!")
+      (message "You don't have any fonts selected in `font-picker-font-rotation'!")
     (let ((ivy-wrap t)
           (font-before (cdr (assoc 'font default-frame-alist))))
       (ivy-read "choose font:" font-picker-font-rotation
-		:preselect font-before
-		:update-fn (lambda ()
+                :preselect font-before
+                :update-fn (lambda ()
                              (let ((font (ivy-state-current ivy-last)))
                                (font-picker-enable-font font)))
-		:action (lambda (font)
-			  (custom-set-variables (font-picker-chosen-font font)))
-		:unwind (lambda ()
+                :action (lambda (font)
+                          (custom-set-variables (font-picker-chosen-font font)))
+                :unwind (lambda ()
                           (font-picker-enable-font font-before))))))
 
 ;;;###autoload
@@ -59,7 +59,7 @@
   :set (lambda (option value)
          (set-default-toplevel-value option value)
          (unless (eq nil font-picker-chosen-font)
-	   (font-picker-enable-font font-picker-chosen-font))))
+           (font-picker-enable-font font-picker-chosen-font))))
 
 (defcustom font-picker-font-rotation nil
   "Set of fonts to choose from."
