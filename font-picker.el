@@ -36,7 +36,7 @@
                              (let ((font (ivy-state-current ivy-last)))
                                (font-picker-enable-font font)))
                 :action (lambda (font)
-                          (custom-set-variables (font-picker-chosen-font font)))
+                          (custom-set-variables `(font-picker-chosen-font ,font)))
                 :unwind (lambda ()
                           (font-picker-enable-font font-before))))))
 
