@@ -47,6 +47,10 @@
    (cons `(font . ,font)
          (assq-delete-all 'font default-frame-alist))))
 
+(defun font-picker-apply-chosen-font ()
+  (unless (eq nil font-picker-chosen-font)
+    (font-picker-enable-font font-picker-chosen-font)))
+
 (defgroup font-picker nil
   "Customization group for font-picker."
   :prefix "font-picker"
@@ -58,8 +62,7 @@
   :type 'string
   :set (lambda (option value)
          (set-default-toplevel-value option value)
-         (unless (eq nil font-picker-chosen-font)
-           (font-picker-enable-font font-picker-chosen-font))))
+         (font-picker-apply-chosen-font)))
 
 (defcustom font-picker-font-rotation nil
   "Set of fonts to choose from."
