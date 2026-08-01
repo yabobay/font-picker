@@ -13,14 +13,14 @@
 
 ;;     This package is for people who always switch between programming
 ;;     fonts a lot. It gives you an interactive font selection prompt
-;;     (`font-picker-choose-font') with the fonts selected in the
-;;     `font-picker-font-rotation' variable.  That font gets set to the
-;;     `font-picker-chosen-font' variable, which you can save to have the
-;;     font load every time you open Emacs.
+;;     (`M-x font-picker-choose-font') with the fonts included in the
+;;     `font-picker-font-rotation' variable.
 
 ;;; Code:
 
 (provide 'font-picker)
+
+(defvar font-picker-current-font nil)
 
 ;;;###autoload
 (defun font-picker-choose-font ()
@@ -28,44 +28,48 @@
   (interactive)
   (if (zerop (length font-picker-font-rotation))
       (message "You don't have any fonts selected in `font-picker-font-rotation'!")
-    (let ((ivy-wrap t)
-          (font-before (cdr (assoc 'font default-frame-alist))))
+    (let (;(ivy-wrap t)
+          (font-before font-picker-current-font))
       (ivy-read "choose font:" font-picker-font-rotation
                 :preselect font-before
                 :update-fn (lambda ()
                              (let ((font (ivy-state-current ivy-last)))
                                (font-picker-enable-font font)))
                 :action (lambda (font)
-                          (custom-set-variables `(font-picker-chosen-font ,font)))
+                          (set 'font-picker-current-font font)
+                          (font-picker-reload-font))
                 :unwind (lambda ()
                           (font-picker-enable-font font-before))))))
 
 ;;;###autoload
 (defun font-picker-enable-font (font)
   "Set a font for the current session."
-  (modify-all-frames-parameters
-   (cons `(font . ,font)
-         (assq-delete-all 'font default-frame-alist))))
+  (when font
+    (modify-all-frames-parameters
+     (cons `(font . ,font)
+           (assq-delete-all 'font default-frame-alist)))))
 
-(defun font-picker-apply-chosen-font ()
-  (unless (eq nil font-picker-chosen-font)
-    (font-picker-enable-font font-picker-chosen-font)))
+(defun font-picker-reload-font ()
+  (font-picker-enable-font (or font-picker-current-font
+                               font-picker-default-font)))
 
 (defgroup font-picker nil
   "Customization group for font-picker."
   :prefix "font-picker"
   :group 'emacs)
 
-;;;###autoload
-(defcustom font-picker-chosen-font nil
-  "Font in current use."
-  :type 'string
-  :set (lambda (option value)
-         (set-default-toplevel-value option value)
-         (font-picker-apply-chosen-font)))
+(defcustom font-picker-default-font nil
+  "Font to load at startup."
+  :type 'string)
 
 (defcustom font-picker-font-rotation nil
   "Set of fonts to choose from."
   :type '(repeat string))
+
+(advice-add 'enable-theme :after
+            (lambda (&rest r)
+              (font-picker-reload-font)))
+
+(add-hook 'emacs-startup-hook 'font-picker-reload-font)
 
 ;;; font-picker.el ends here
