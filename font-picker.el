@@ -51,7 +51,7 @@
 
 (defun font-picker-reload-font ()
   (font-picker-enable-font (or font-picker-current-font
-                               font-picker-default-font)))
+                               (set 'font-picker-current-font font-picker-default-font))))
 
 (defgroup font-picker nil
   "Customization group for font-picker."
